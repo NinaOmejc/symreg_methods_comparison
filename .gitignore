@@ -1,0 +1,15 @@
+/results/*
+/data/
+/.idea/
+/symreg.sif
+/info.txt
+/src/dso_test.py
+/src/dso_test.sh
+/src/proged_test.py
+/src/revision_run_dso.sh
+/src/revision_run_sindy.sh
+/src/system_identification.py
+/src/check_proged/run_conn_inner.sh
+/src/check_proged/run_proged_outer.sh
+/src/check_proged/revision_run_proged.sh
+/analysis/*

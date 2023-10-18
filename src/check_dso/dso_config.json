@@ -1,0 +1,193 @@
+{
+   // Experiment configuration.
+   "experiment" : {
+
+      // Root directory to save results.
+      "logdir" : ".\\log",
+
+      // Random number seed. Don't forget to change this for multiple runs!
+      "seed" : 0
+   },
+
+   // Task-specific hyperparameters. See task-specific configs (e.g.
+   // config_regression.json) for more info.
+   "task" : {
+      // Deep Symbolic Regression
+      "task_type": "regression",
+      // This can either be (1) the name of the benchmark dataset (see
+      // benchmarks.csv for a list of supported benchmarks) or (2) a path to a
+      // CSV file containing the data.
+      "dataset": ".\\data_myvdp_all_len100_snrinf_init0_y.csv",
+      // To customize a function set, edit this! See functions.py for a list of
+      // supported functions. Note "const" will add placeholder constants that
+      // will be optimized within the training loop. This will considerably
+      // increase runtime.
+      "function_set": [
+         "add",
+         "sub",
+         "mul",
+//         "div",
+//         "sin",
+//         "cos",
+//         "exp",
+//         "log",
+      ],
+
+      // Metric to be used for the reward function. See regression.py for
+      // supported metrics.
+      "metric": "inv_nrmse",
+      "metric_params": [
+         1.0
+      ],
+
+      // Optional alternate metric to be used at evaluation time.
+      "extra_metric_test": null,
+      "extra_metric_test_params": [],
+      // NRMSE threshold for early stopping. This is useful for noiseless
+      // benchmark problems when DSO discovers the true solution.
+      "threshold": 1e-12,
+      // With protected=false, floating-point errors (e.g. log of negative
+      // number) will simply returns a minimal reward. With protected=true,
+      // "protected" functions will prevent floating-point errors, but may
+      // introduce discontinuities in the learned functions.
+      "protected": false,
+      // You can add artificial reward noise directly to the reward function.
+      // Note this does NOT add noise to the dataset.
+      "reward_noise": 0.0,
+      "reward_noise_type": "r",
+      "normalize_variance": false,
+      // Set of thresholds (shared by all input variables) for building
+      // decision trees. Note that no StateChecker will be added to Library
+      // if decision_tree_threshold_set is an empty list or null.
+      "decision_tree_threshold_set": []
+   },
+   "training": {
+ //      "n_epochs": null,
+      "n_samples": 100000,
+      "batch_size": 500,
+      "epsilon": 0.02,
+      "baseline": "R_e",
+      "alpha": 0.5,
+      "b_jumpstart": false,
+      "n_cores_batch": 4,
+      "complexity": "token",
+      "const_optimizer": "scipy",
+      "const_params": {},
+      "verbose": true,
+      "debug": 0,
+      "early_stopping": true,
+      "hof": 50,
+      "use_memory": false,
+      "memory_capacity": 1000.0,
+      "warm_start": null,
+      "memory_threshold": null,
+      "save_all_epoch": false,
+      "save_summary": true,
+      "save_positional_entropy": false,
+      "save_pareto_front": true,
+      "save_cache": false,
+      "save_cache_r_min": 0.9,
+      "save_freq": 1,
+      "save_token_count": false
+   },
+   // The State Manager defines the inputs to the Controller
+   "state_manager": {
+         "type" : "hierarchical",
+         // Observation hyperparameters
+         "observe_action" : false,
+         "observe_parent" : true,
+         "observe_sibling" : true,
+         "observe_dangling" : false,
+         "embedding" : false,
+         "embedding_size" : 8
+   },
+   // Hyperparameters related to the RNN distribution over objects.
+   "controller" : {
+      // Maximum sequence length.
+      "max_length" : 128,
+
+      // RNN architectural hyperparameters.
+      "cell" : "lstm",
+      "num_layers" : 1,
+      "num_units" : 32,
+      "initializer" : "zeros",
+
+      // Optimizer hyperparameters.
+      "learning_rate" : 0.001,
+      "optimizer" : "adam",
+
+      // Entropy regularizer hyperparameters.
+      "entropy_weight" : 0.005,
+      "entropy_gamma" : 1.0,
+
+      // EXPERIMENTAL: Priority queue training hyperparameters.
+      "pqt" : false,
+      "pqt_k" : 10,
+      "pqt_batch_size" : 1,
+      "pqt_weight" : 200.0,
+      "pqt_use_pg" : false,
+
+      // Whether to compute TensorBoard summaries.
+      "summary" : true
+   },
+
+   // Hyperparameters related to genetic programming hybrid methods.
+   "gp_meld" : {
+      "run_gp_meld" : true,
+      "verbose" : false,
+      "generations" : 20,
+      "p_crossover" : 0.5,
+      "p_mutate" : 0.5,
+      "tournament_size" : 5,
+      "train_n" : 50,
+      "mutate_tree_max" : 3
+   },
+
+ // Hyperparameters related to including in situ priors and constraints. Each
+   // prior must explicitly be turned "on" or it will not be used. See
+   // config_common.json for descriptions of each prior.
+   "prior": {
+      // Memory sanity value. Limit strings to size 256
+      // This can be set very high, but it runs slower.
+      // Max value is 1000.
+      "length" : {
+         "min_" : 2,
+         "max_" : 128,
+         "on" : true
+      },
+      // Memory sanity value. Have at most 10 optimizable constants.
+      // This can be set very high, but it runs rather slow.
+      "repeat" : {
+         "tokens" : "const",
+         "min_" : null,
+         "max_" : 10,
+         "on" : true
+      },
+      "inverse" : {
+         "on" : true
+      },
+      "trig" : {
+         "on" : true
+      },
+      "const" : {
+         "on" : true
+      },
+      "no_inputs" : {
+         "on" : true
+      },
+      "uniform_arity" : {
+         "on" : false
+      },
+      "soft_length" : {
+         "loc" : 10,
+         "scale" : 5,
+         "on" : true
+      }
+   },
+
+   // Postprocessing hyperparameters.
+   "postprocess" : {
+      "show_count" : 5,
+      "save_plots" : true
+   }
+}

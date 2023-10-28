@@ -13,3 +13,4 @@
 /src/check_proged/run_proged_outer.sh
 /src/check_proged/revision_run_proged.sh
 /analysis/*
+/src/check_dso/old/*

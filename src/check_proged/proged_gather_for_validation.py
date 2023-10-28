@@ -59,7 +59,7 @@ def get_duration(models, imodel):
 if __name__ == "__main__":
     method = "proged"
     exp_type = 'sysident_num_full'
-    exp_version = "e1"
+    exp_version = "e2"
     obs = "full"
 
     data_sizes = ["small", "large"]
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     fname_results_in = f"{method}_{exp_type}_{exp_version}_{{}}_train_{{}}_snr{{}}_init{{}}_obs{obs}_b{{}}_{{}}_fitted.pg"
     path_out = f"{root_dir}{os.sep}analysis{os.sep}{exp_type}{os.sep}"
     os.makedirs(path_out, exist_ok=True)
-
+    start_time = pd.Timestamp.now()
     results = gather_for_validation(systems=systems_collection,
                                      data_sizes=data_sizes,
                                      snrs=snrs,
@@ -87,7 +87,7 @@ if __name__ == "__main__":
                                      path_out=path_out,
                                      save_results=True)
 
-
+    print(f"Duration: {pd.Timestamp.now() - start_time}")
 
 
 

@@ -87,7 +87,15 @@ def get_configuration(iinput, systems_collection, data_sizes, snrs, n_data, n_ba
 
     return combinations[iinput]
 
-
+def get_configuration_from_unsuccessful(iinput, unsuccessful_configs_path):
+    df = pd.read_csv(unsuccessful_configs_path, sep='\t')
+    system_name = df.loc[iinput, 'system']
+    data_size = df.loc[iinput, 'data_size']
+    snr = int(df.loc[iinput, 'snr']) if not np.isnan(df.loc[iinput, 'snr']) else None
+    iinit = df.loc[iinput, 'iinit']
+    ib = df.loc[iinput, 'ib']
+    eq_sym = df.loc[iinput, 'eq']
+    return system_name, data_size, snr, iinit, ib, eq_sym
 
 ##
 if __name__ == '__main__':
@@ -100,8 +108,12 @@ if __name__ == '__main__':
     n_batches = 100
     n_samples = 2500
 
-    system_name, data_size, snr, iinit, ib, eq_sym = get_configuration(iinput, systems_collection, data_sizes,
-                                                                       snrs, n_data, n_batches)
+    # system_name, data_size, snr, iinit, ib, eq_sym = get_configuration(iinput, systems_collection, data_sizes,
+    #                                                                    snrs, n_data, n_batches)
+    root_dir = "D:\\Experiments\\symreg_methods_comparison"
+    unsuccessful_configs_path = f"{root_dir}{os.sep}analysis{os.sep}sysident_num_full{os.sep}unsuccessfully_ran_models_proged" \
+                                f"_e1_sysident_num_full.csv"
+    system_name, data_size, snr, iinit, ib, eq_sym = get_configuration_from_unsuccessful(iinput, unsuccessful_configs_path)
 
     # fixed settings
     systems = {system_name: systems_collection[system_name]}

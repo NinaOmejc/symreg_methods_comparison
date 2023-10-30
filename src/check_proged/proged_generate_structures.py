@@ -1,5 +1,10 @@
+# Description: Generates structures from ProGED grammars and saves them in batches. The structures are saved in the
+# folder specified by path_structures. The grammars are specified by the grammar_type and the variables. The
+# batch_settings specify the number of structures to be generated, the number of variables, the probabilities of
+# variables, and the seed. The batch_settings are saved in the folder specified by path_out.
+#
+
 import os
-import io
 import pickle
 import pandas as pd
 import numpy as np
@@ -96,26 +101,29 @@ def create_batches(**batch_settings):
         fo.write(str(k) + ' >>> ' + str(v) + '\n\n')
     fo.close()
 
-    # do manually
-    if batch_settings["manual"]:
-        symbols = {"x": batch_settings["variables"], "const": "C"}
-        models = pg.ModelBox()
-        models.add_system(["C*y", "C*y + C*x*x*y + C*x"], symbols=symbols)
-        models.add_system(["C*x", "C*y"], symbols=symbols)
-        file_name = os.path.join(batch_settings["path_out"], "job_{}_v{}_batchM.pg".format(batch_settings["system_type"], batch_settings["job_version"]))
-        with open(file_name, "wb") as file:
-            pickle.dump(models, file)
-
+##
 
 if __name__ == '__main__':
 
-    exp_type = "sysident_num_full"
+    method = "proged"
+    exp_version = "e1"  # "e1" (constrained model search space) or "e2" (unconstrained model search space)
+    observability = "partial"  # "full" or "partial"
+    simulation_type = "sym" if observability == "partial" else "num"  # numerical derivation (num) or simulation by solving system of odes using initial values (sym)
+    exp_type = f"sysident_{simulation_type}_{observability}"  # "sysident_sym_partial" or "sysident_num_full
+
+    # root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
     root_dir = "D:\\Experiments\\symreg_methods_comparison\\"
     path_out = f"{root_dir}results\\{exp_type}\\proged\\structures\\"
+
     systems = systems_collection
+    if exp_type == "sysident_sym_partial":
+        # take only vdp from systems
+        systems = {k: v for k, v in systems.items() if k == "vdp"}
+
     n_samples = 2500
     n_batches = 100
-    universal_grammar = True
+    universal_grammar = False
+    whole_system = True if "partial" in exp_type else False   # true for parobs experiments and False for full observability experiments
 
     # generate grammars based on system grammar
     for system_name in list(systems.keys()):
@@ -134,7 +142,7 @@ if __name__ == '__main__':
             "grammar": grammar_type,
             "variables": variables,
             "p_vars": p_vars,
-            "whole_system": False,  # if False, each equation in the model separately
+            "whole_system": whole_system,  # if False, each equation in the model separately
             "n_samples": n_samples, #systems[sys_name].num_samples,
             "n_batches": n_batches,
             "path_out": f"{path_out}structs_{grammar_type}_nsamp{n_samples}_nbatch{n_batches}\\",
@@ -146,7 +154,11 @@ if __name__ == '__main__':
         print(f"Finished grammar: {grammar_type} for system: {system_name}")
 
 
-## open grammar
-import pickle
-with open("D:\\Experiments\\symreg_methods_comparison\\results\\sysident_num_full\\proged\\structures\\structs_universal_xy_nsamp2500_nbatch100\\structs_universal_xy_nsamp2500_nbatch100_b0.pg", "rb") as file:
-    models = pickle.load(file)
+## open and check created grammar
+# import pickle
+#filename = "structs_{}_nsamp{}_nbatch{}_b{}.pg".format(batch_settings["grammar"],
+#                                                       batch_settings["n_samples"],
+#                                                       batch_settings["n_batches"],
+#                                                       str(0))
+# with open(batch_settings["path_out"] + filename, "rb") as file:
+#     models = pickle.load(file)

@@ -242,10 +242,12 @@ def display_results(row_idx, row, orig_expanded, orig_expanded_consts, model_exp
 if __name__ == "__main__":
 
 
-    exp_version = "e2"
-    exp_type = 'sysident_num_full'
+    exp_version = "e1"  # "e1" (constrained model search space) or "e2" (unconstrained model search space)
+    observability = "full"  # "full" or "partial"
+    simulation_type = "num" if observability == "full" else "sym"  # numerical derivation (num) or simulation by solving system of odes using initial values (sym)
+    exp_type = f"sysident_{simulation_type}_{observability}"
+
     methods = ["proged", "sindy", "dso"]
-    obs = "full"
     merge_func_val = "mean"
 
     data_sizes = ["small", "large"]
@@ -256,8 +258,9 @@ if __name__ == "__main__":
     check_manually = False
     print_pretty_csv_table_of_results = True  # module tabulate needed
 
-    root_dir = "D:\\Experiments\\symreg_methods_comparison"
+    root_dir = "D:\\Experiments\\symreg_methods_comparison"     # adjust the root dir of the project
     sys.path.append(root_dir)
+
     path_results_in = f"{root_dir}{os.sep}analysis{os.sep}{exp_type}{os.sep}{exp_version}{os.sep}"
     fname_results_in = f"best_results_{exp_version}_withValTE{merge_func_val}_withTestTE.csv"
     fname_results_out = f"best_results_{exp_version}_withValTE{merge_func_val}_withTestTE_withTD_compl.csv"
@@ -269,6 +272,7 @@ if __name__ == "__main__":
     else:
         print(f"Loading results from {path_results_in}{fname_results_in}")
         results = pd.read_csv(f"{path_results_in}{fname_results_in}", sep=",")
+
     # if the TD_auto column is not present, create it
     if "TD_auto" not in results.columns:
         results["TD_auto"] = np.nan

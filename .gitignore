@@ -14,3 +14,4 @@
 /src/check_proged/revision_run_proged.sh
 /analysis/*
 /src/check_dso/old/*
+/src/misc.py

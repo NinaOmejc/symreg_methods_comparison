@@ -98,71 +98,68 @@ def calculate_trajectory_error(true_trajectory, modeled_trajectory):
     return np.sqrt((np.mean((modeled_trajectory - true_trajectory) ** 2))) / np.std(true_trajectory)
 
 
-def get_job_configuration(iinput, systems_collection, data_sizes, snrs, n_train_data, n_val_data):
+def get_job_configuration(iinput, systems_collection, data_sizes, snrs, n_train_data, n_val_data, observability):
 
     train_data_indices = list(range(n_train_data))
     val_data_indices = list(range(n_val_data))
+    obss = [['x'], ['y'], ['x', 'y']] if observability == "partial" else [['x', 'y']]
+    obss_lorenz = [['x', 'y'], ['x', 'z'], ['y', 'z'], ['x', 'y', 'z']] if observability == "partial" else [['x', 'y', 'z']]
+    eq_sym = 'xy' if observability == "partial" else ['x', 'y']  # if partial, identify all equations in the model together
+    eq_sym_lorenz = 'xyz' if observability == "partial" else ['x', 'y', 'z']
+
     # check if lorenz is in the keys of the systems_collection and adjust the combinations of state vars accordingly
     if 'lorenz' in systems_collection.keys():
         # remove lorenz from system_collection
         new_systems_collection = systems_collection.copy()
         lorenz = {'lorenz': new_systems_collection.pop('lorenz')}
-        combinations_other = list(itertools.product(new_systems_collection, data_sizes, snrs, ['x', 'y'],
+        combinations_other = list(itertools.product(new_systems_collection, data_sizes, snrs, obss, eq_sym,
                                                     train_data_indices, val_data_indices))
-        combinations_lorenz = list(itertools.product(lorenz, data_sizes, snrs, ['x', 'y', 'z'],
+        combinations_lorenz = list(itertools.product(lorenz, data_sizes, snrs, obss_lorenz, eq_sym_lorenz,
                                                      train_data_indices, val_data_indices))
         combinations = combinations_other + combinations_lorenz
     else:
-        combinations = list(itertools.product(systems_collection, data_sizes, snrs, ['x', 'y'],
+        combinations = list(itertools.product(systems_collection, data_sizes, snrs, obss, eq_sym,
                                               train_data_indices, val_data_indices))
 
     return combinations[iinput]
 
 
-def transform_input_to_only_unsuccessful(iinput, path_to_unsuccessful):
-    if path_to_unsuccessful == "":
-        return iinput
-    else:
-        unsuccessful_runs = pd.read_csv(path_to_unsuccessful)
-        return unsuccessful_runs['0'][iinput]
-
-
-
 ##
 if __name__ == "__main__":
 
+    # iinput = int(sys.argv[1])  # uncomment if running on HPC cluster
+    iinput = 435                 # comment out if running on HPC cluster
 
-    iinput = 435  # int(sys.argv[1])
-    exp_version = "e1"
-    exp_type = 'sysident_num_full'
-    methods = ["proged", "sindy", "dso"]
-    obs = "full"
+    # root_dir = "."                                         # uncomment if running on HPC cluster
+    root_dir = "D:\\Experiments\\symreg_methods_comparison"  # comment out if running on HPC cluster
+    sys.path.append(root_dir)
+
+    exp_version = "e1"  # "e1" (constrained model search space) or "e2" (unconstrained model search space)
+    observability = "full"
+    simulation_type = "num" if observability == "full" else "sym"  # numerical derivation (num) or simulation by solving system of odes using initial values (sym)
+    exp_type = f"sysident_{simulation_type}_{observability}"
+    methods = ["proged", "sindy", "dso"]  # if observability == "partial", only proged should be in the list
 
     data_sizes = ["small", "large"]
     snrs = ['None', '30', '13']
     n_train_data = 4
     n_val_data = 4
 
-    root_dir = "D:\\Experiments\\symreg_methods_comparison"
-    sys.path.append(root_dir)
-
     path_in_gathered_results = f"{root_dir}{os.sep}analysis{os.sep}{exp_type}{os.sep}{exp_version}{os.sep}"
     results = load_and_join_results(methods, path_in_gathered_results)
-    #path_to_unsuccessful = f"{path_in_gathered_results}unsucessful_validation_subsets_e2.csv"
-    #iinput = transform_input_to_only_unsuccessful(iinput, path_to_unsuccessful)
 
-    system, data_size, snr, eqsym, iinit_train, iinit_val = get_job_configuration(iinput, systems_collection, data_sizes, snrs,
-                                                                 n_train_data, n_val_data)
+    system, data_size, snr, obs, eqsym, iinit_train, iinit_val = get_job_configuration(iinput, systems_collection,
+                                                            data_sizes, snrs, n_train_data, n_val_data, observability)
 
     time_end = 20 if data_size == "large" else 10
     time_step = 0.01 if data_size == "large" else 0.1
 
     # get correct rows from results, that correspond to appropriate 'system', 'snr, 'data_size'
     # The column of old index values should be named orig_index
-
     results_subset = results[(results["system"] == system) &
                              (results["snr"] == snr) &
                              (results["data_size"] == data_size) &
+                             (results["obs"] == obs) &
                              (results["eq"] == eqsym) &
                              (results["iinit"] == iinit_train)].reset_index(drop=False)
 
@@ -190,29 +187,4 @@ if __name__ == "__main__":
 
 ##
 
-
-## for proged, fpr all data size, snr, groups, sum up duration (THE TRAINING DURATION)
-# for each group, calculate mean and std of duration
-proged_grouped = results[results['method'] == 'proged'].groupby(['data_size', 'snr', 'system', 'iinit', 'eq'])
-proged_duration_504 = proged_grouped['duration'].agg([np.sum]).reset_index()
-proged_duration_6 = proged_duration_504.groupby(['data_size', 'snr']).agg([np.mean, np.std]).reset_index()
-
-# sindy
-sindy_grouped = results[(results['method'] == 'sindy') & (results['eq'] == 'x')].groupby(['data_size', 'snr', 'system', 'iinit', 'eq'])
-sindy_duration_240 = sindy_grouped['duration'].agg([np.sum]).reset_index()
-sindy_duration_6 = sindy_duration_240.groupby(['data_size', 'snr']).agg([np.mean, np.std]).reset_index()
-
-# dso
-dso_grouped = results[(results['method'] == 'dso')].groupby(['data_size', 'snr', 'system', 'iinit', 'eq'])
-dso_duration_504 = dso_grouped['duration'].agg([np.mean, np.std]).reset_index()
-dso_duration_6 = dso_duration_504.groupby(['data_size', 'snr']).agg([np.mean, np.std]).reset_index()
-
-
-# plot a box plots
-import seaborn as sns
-import matplotlib.pyplot as plt
-sns.set_theme(style="whitegrid")
-ax = sns.boxplot(x="data_size", y="duration", hue="snr", data=a, palette="Set3")
-ax.set_yscale("log")
-plt.show()
 

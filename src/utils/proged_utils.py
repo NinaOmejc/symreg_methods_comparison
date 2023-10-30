@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def get_fit_settings(obs):
+def get_fit_settings(obs, task_type="algebraic"):
 
     experiment = {
         "seed": 0,
@@ -49,7 +49,7 @@ def get_fit_settings(obs):
     }
 
     settings = {
-        "task_type": "algebraic",
+        "task_type": task_type,
         "experiment": experiment,
         "parameter_estimation": parameter_estimation,
         "optimizer_DE": optimizer_DE,

@@ -91,7 +91,6 @@ def calculate_trajectory_error(true_trajectory, modeled_trajectory):
 def load_and_join_results(systems, data_sizes, snrs, n_train_data, n_val_data, path_in_gathered_results, merge_func_val="nanmean", save_best_results=True):
 
     # check if f"{path_in_gathered_results}best_results_{exp_version}_withValTE.csv" exists
-    unsucessful_subsets = []
     path_to_save = os.path.dirname(os.path.dirname(path_in_gathered_results)) + os.sep
     if os.path.isfile(f"{path_to_save}best_results_{exp_version}_withValTE{merge_func_val}.csv"):
         results_best = pd.read_csv(f"{path_to_save}best_results_{exp_version}_withValTE{merge_func_val}.csv", sep='\t')
@@ -121,8 +120,8 @@ def load_and_join_results(systems, data_sizes, snrs, n_train_data, n_val_data, p
                         print(f"Loading Combination i: {i + n_train_data*iinit_train + iinit_val}/{n_combinations} | init_train: {iinit_train} | init_val: {iinit_val} | snr: {iresult['snr'].unique()[0]} | data_size: {iresult['data_size'].unique()[0]} | system: {iresult['system'].unique()[0]} | eq: {iresult['eq'].unique()[0]}")
                     except:
                         print(f"Combination i: {i + n_train_data*iinit_train + iinit_val}/{n_combinations} | init_train: {iinit_train} | init_val: {iinit_val} not found.")
-                        unsucessful_subsets.append(i + n_train_data*iinit_train + iinit_val)
                         continue
+
                     # join iresults with the results_iconfig if iinit == 0
                     if iinit_val == 0:
                         results_part = pd.concat([results_part, iresult], axis=0)
@@ -164,18 +163,19 @@ def load_and_join_results(systems, data_sizes, snrs, n_train_data, n_val_data, p
             # get path to save the results that is one folder up from the path_in_gathered_results
             results_best.to_csv(f"{path_to_save}best_results_{exp_version}_withValTE{merge_func_val}.csv", sep='\t', index=False)
 
-    return results_best, unsucessful_subsets
-
+    return results_best
 
 
 
 ##
 if __name__ == "__main__":
 
-    exp_version = "e2"
-    exp_type = 'sysident_num_full'
+    exp_version = "e1"  # "e1" (constrained model search space) or "e2" (unconstrained model search space)
+    observability = "full"  # "full" or "partial"
+    simulation_type = "num" if observability == "full" else "sym"  # numerical derivation (num) or simulation by solving system of odes using initial values (sym)
+    exp_type = f"sysident_{simulation_type}_{observability}"
+
     methods = ["proged", "sindy", "dso"]
-    obs = "full"
 
     systems = systems_collection
     data_sizes = ["small", "large"]
@@ -185,16 +185,13 @@ if __name__ == "__main__":
     n_test_data = 4
     merge_func_val = "mean"
 
-    root_dir = "D:\\Experiments\\symreg_methods_comparison"
+    root_dir = "D:\\Experiments\\symreg_methods_comparison"  # adjust to your root directory
     sys.path.append(root_dir)
+
     path_in_gathered_results = f"{root_dir}{os.sep}analysis{os.sep}{exp_type}{os.sep}{exp_version}{os.sep}val{os.sep}"
 
-    results, unsucessful_subsets = load_and_join_results(systems, data_sizes, snrs, n_train_data, n_val_data, path_in_gathered_results,
-                                                         merge_func_val=merge_func_val, save_best_results=True)
-
-    # save unsucessful_subsets in a csv file
-    path_to_save = os.path.dirname(os.path.dirname(path_in_gathered_results)) + os.sep
-    pd.DataFrame(unsucessful_subsets).to_csv(f"{path_to_save}unsucessful_validation_subsets_{exp_version}.csv", sep=',', index=False)
+    results = load_and_join_results(systems, data_sizes, snrs, n_train_data, n_val_data,
+                                    path_in_gathered_results, merge_func_val=merge_func_val, save_best_results=True)
 
     results_tested = test_results(results, root_dir)
 

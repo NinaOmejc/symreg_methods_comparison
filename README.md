@@ -4,4 +4,4 @@ The repository contains the code for evaluation of five symbolic regression meth
 
 
 Singularity container can be pulled from the SymLabs singularity library using this command:
-'singularity pull --arch amd64 library://nomejc/symreg/symreg.sif:latest'
+`singularity pull --arch amd64 library://nomejc/symreg/symreg.sif:latest`

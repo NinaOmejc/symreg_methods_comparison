@@ -8,10 +8,9 @@ The repository contains the code for evaluation of five symbolic regression meth
 1. Download/Clone the repository to the prefered location.
 
 2. Pull the singularity container from the SyLabs singularity library. To do that first install singularity (if you have not already), go to the repository location and pull the container from the library using this command:
-`singularity pull --arch amd64 library://nomejc/symreg/symreg.sif:latest`. If the command fails, you will have to login to the SyLabs library, following these steps:
-* Login to Sylabs at https://cloud.sylabs.io/ (registration is free)
-* Inside Singularity Container Services, go to Dashboard > Access Tokens > create a token and copy it (for remote access to the SyLabs library).
-* In local terminal run: 'singularity remote login' and paste the access token at the prompt.
+`singularity pull --arch amd64 library://nomejc/symreg/symreg.sif:latest`. If the command fails, you will have to change singularity's default remote server following these steps:
+* Run command `singularity remote add SylabsCloud cloud.sylabs.io`
+* Run command `singularity remote use SylabsCloud`
 * Run the same command `singularity pull ...` as above.
 
 4. Download Dynobench benchmark from the Zenodo platform, that is located here: https://zenodo.org/records/10041312. Save the dataset folder `./dynobench/data/*` inside the symreg_methods_comparison folder

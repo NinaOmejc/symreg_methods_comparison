@@ -3,14 +3,25 @@
 The repository contains the code for evaluation of five symbolic regression methods, as was done in the paper _Probabilistic grammars for modeling dynamical systems from coarse, noisy, and partial data_ (in submission). The repository is still undergoing updates.
 
 
-We ran system identification with the methods ProGED, DSO and SINDy on the high-performance computing cluster. To repeat the experiments, follow the instructions below.
-
-## Part I - System identification using training datasets
+## Part 0 - Preparation
 
 1. Download/Clone the repository to the prefered location.
 
 2. Pull the singularity container from the SyLabs singularity library. To do that first install singularity (if you have not already), go to the repository location and pull the container from the library using this command:
-`singularity pull --arch amd64 library://nomejc/symreg/symreg.sif:latest`
+`singularity pull --arch amd64 library://nomejc/symreg/symreg.sif:latest`. If the command fails, you will have to login to the SyLabs library, following these steps:
+* Login to Sylabs at https://cloud.sylabs.io/ (registration is free)
+* Inside Singularity Container Services, go to Dashboard > Access Tokens > create a token and copy it (for remote access to the SyLabs library).
+* In local terminal run: 'singularity remote login' and paste the access token at the prompt.
+* Run the same command `singularity pull ...` as above.
+
+4. Download Dynobench benchmark from the Zenodo platform, that is located here: https://zenodo.org/records/10041312. Save the dataset folder `./dynobench/data/*` inside the symreg_methods_comparison folder
+
+5. Modify the data files for DSO using the script `./utils/dso_modify_data_files.py`. The modified data files will be saved inside ./data folder.
+
+6. Create structures 
+
+## Part I - System identification using training datasets
+We ran system identification with the methods ProGED, DSO and SINDy on the high-performance computing cluster. To repeat the experiments, follow the instructions below.
 
 3. Copy the symreg.sif container as well as the folders ./src, ./data and ./results to the local node on the cluster. Note that with ProGED, we first create possible structures using grammars locally, using the script `./src/check_proged/proged_generate_structures.py`. The structures are saved in the path `.\symreg_methods_comparison\results\sysident_num_full\proged\structures` for full observability scenario. The structures folder should also be copied to the cluster, for ProGED to run properly.
   

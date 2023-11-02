@@ -26,7 +26,7 @@ We ran system identification with the methods ProGED, DSO and SINDy on the high-
   
 4. Run the bash shell script that corresponds to the method you want to run (e.g. for SINDy, run `run_sindy.sh`). We call the scripts using slurm's `sbatch` command. For ProGED, run `run_proged_outer.sh`, which will call the `run_proged.sh`. The reason is this way more than one thousand jobs can be submitted to the slurm. Make sure that you also manually create the ./slurm folder for the log files, otherwise the jobs will fail.
 
-We ran other methods, GPoM and L-ODEfind, locally, using the scripts `.\src\check_gpom\gpom_system_identification.R` and `.\src\check_lodefind\lodefind_system_identification.py` 
+We ran other methods, GPoM and L-ODEfind, locally, using the scripts `.\src\check_gpom\gpom_system_identification.R` and `.\src\check_lodefind\lodefind_system_identification.py`. Importantly, the script `lodefind_system_identification.py` has to be run inside L-ODEfind-master root directory. The results of the system identification will be then saved in the symreg_methods_comparison\results\... path as for other methods.
 
 ## Part II - Validation datasets
 In this part, we evaluate all the models that were returned by the methods using the validation datasets. We ran the validation on the cluster as well, using the command `sbatch run_validation.sh`. The bash script runs the python code `common1_validation_hpc.py`.

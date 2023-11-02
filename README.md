@@ -17,7 +17,7 @@ The repository contains the code for evaluation of five symbolic regression meth
 
 5. Modify the data files for DSO using the script `./utils/dso_modify_data_files.py`. The modified data files will be saved inside ./data folder.
 
-6. Create structures 
+6. Create candidate structures for ProGED using `./src/proged_generate_structures.py`.
 
 ## Part I - System identification using training datasets
 We ran system identification with the methods ProGED, DSO and SINDy on the high-performance computing cluster. To repeat the experiments, follow the instructions below.

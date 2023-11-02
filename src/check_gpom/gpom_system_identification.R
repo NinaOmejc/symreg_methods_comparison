@@ -1,4 +1,9 @@
-require("GPoM")
+require("GPoM")  # check if the method is installed and install if not 
+
+###############################################################################
+# FUNCTIONS
+###############################################################################
+
 
 mse <- function(x, y){
   means = colMeans(y)
@@ -145,10 +150,12 @@ experiment <- function(filename, write_results_folder, observed_var, keep2test, 
 }
 
 ###############################################################################
+# SET AND RUN GPOM
+###############################################################################
 
-exp_version = 'e6'
-system = 'myvdp'
-data_version = "allonger"
+exp_version = 'e1' # e1: constrained search space (we did not do e2 version (unconstrained space) for gpom)
+system = 'vdp'
+data_version = "train"
 data_length = 2000
 test_length = 1
 snrs = c('inf', 30, 13)

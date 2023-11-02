@@ -17,7 +17,7 @@ exp_type = f"sysident_num_{observability}"
 data_type = "train"
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-root_dir = "D:\\Experiments\\symreg_methods_comparison"
+root_dir = ".\\symreg_methods_comparison"
 
 # Get data
 # data_size, sys_name, snr, iinit = 'small', 'vdp', 30, 0

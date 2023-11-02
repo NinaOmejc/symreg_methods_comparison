@@ -318,7 +318,7 @@ if __name__ == "__main__":
     # get a system dict that has only one item (key, value pair) of the system name from systems_collection
     systems = {system_name: systems_collection[system_name]}
     method = "sindy"
-    exp_version = "e2test"
+    exp_version = "e2"
     observability = "full"
     exp_type = f"sysident_num_{observability}"
     data_type = "train"

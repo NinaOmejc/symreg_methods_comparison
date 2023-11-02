@@ -15,9 +15,11 @@ The repository contains the code for evaluation of five symbolic regression meth
 
 4. Download Dynobench benchmark from the Zenodo platform, that is located here: https://zenodo.org/records/10041312. Save the dataset folder `.\dynobench\data\*` inside the symreg_methods_comparison folder
 
-5. Modify the data files for DSO using the script `.\utils\dso_prepare_data.py`. Similarly, modify the data for L-ODEfind and GPoM using the script `.\utils\lodefind_gpom_prepare_data.py`. The modified data files will be saved inside .\data folder.
+5. Download L-ODEfind software from: https://github.com/agussomacal/L-ODEfind. Note that the method GPoM is downloaded automatically from the CRAN repository, inside the R script.
 
-6. Create candidate structures for ProGED using `.\src\proged_generate_structures.py`.
+6. Modify the data files for DSO using the script `.\utils\dso_prepare_data.py`. Similarly, modify the data for L-ODEfind and GPoM using the script `.\utils\lodefind_gpom_prepare_data.py`. The modified data files will be saved inside .\data folder.
+
+7. Create candidate structures for ProGED using `.\src\proged_generate_structures.py`.
 
 ## Part I - System identification using training datasets
 We ran system identification with the methods ProGED, DSO and SINDy on the high-performance computing cluster. To repeat the experiments, follow the steps below.

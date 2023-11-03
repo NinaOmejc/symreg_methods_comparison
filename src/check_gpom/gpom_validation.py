@@ -125,15 +125,32 @@ for data_size in data_sizes:
                 filename_base = f"{method}_{sys_name}_{data_size}_dmax{dmax}_poly3_steps5120_obs{iobs_name}_snr{snr}_init{iinit_train}"
                 duration_df = pd.read_csv(f"{path_base_in}{os.sep}{filename_base}{os.sep}duration_{filename_base}.csv")
 
+                # find number of models in the folder path
+                results_path = f"{path_base_in}{os.sep}{filename_base}"
+                n_models = len([name for name in os.listdir(results_path) if os.path.isfile(os.path.join(results_path, name)) and 'model' in name])
+
                 # load data
-                for imodel in range(1, 100):
+                for imodel in range(1, n_models):
+
                     # load results
-                    results = pd.read_csv(f"{path_base_in}{os.sep}{filename_base}{os.sep}params_{filename_base}_model{imodel}.csv")
+                    try:
+                        results = pd.read_csv(f"{results_path}{os.sep}params_{filename_base}_model{imodel}.csv")
+                        print(f"data_size: {data_size} | snr: {snr} | iinit: {iinit_train} | obs: {iobs} | Model # {imodel} successfully loaded.")
+                    except:
+                        print(f"data_size: {data_size} | snr: {snr} | iinit: {iinit_train} | obs: {iobs} | Model # {imodel} could not be loaded.")
+                        validation_results.append( [exp_version, method, data_size, sys_name, iobs_name, str(snr), iinit_train, 'xy', np.nan, np.inf, ""])
+                        continue
+
+                    # check if the first entry contains "Error"
+                    if 'Error' in str(results.iloc[0].values):
+                        validation_results.append( [exp_version, method, data_size, sys_name, iobs_name, str(snr), iinit_train, 'xy', np.nan, np.inf, ""])
+                        continue
+
+                    # get expression from coefficients
                     expr = round_constants(get_expr_from_coeffs(results), n=3)
 
                     # get validation error on 4 validation data sets
                     validation_errors = get_errors(n_val_data, path_validation_data, sys_name, time_end, time_step, snr, expr)
-
                     validation_errors_mean = np.mean(validation_errors)
                     validation_results.append([exp_version, method, data_size, sys_name, iobs_name, str(snr), iinit_train, 'xy', np.nan, validation_errors_mean, str(expr)])
 
@@ -152,6 +169,10 @@ results_best = validation_results.groupby(['system', 'data_size', 'snr', 'obs'])
 ###################################################################################################
 print("Doing testing...")
 
+# load results_best
+# validation_results = pd.read_csv(f"{path_results_out}{os.sep}validation_gathered_results_{method}_{exp_version}_{exp_type}.csv", sep=',')
+# results_best = validation_results.groupby(['system', 'data_size', 'snr', 'obs']).agg({'val_TE_mean': 'min', 'expr': 'first'}).reset_index()
+
 for ibest in range(len(results_best)):
     data_size = results_best.iloc[ibest]['data_size']
     sys_name = results_best.iloc[ibest]['system']
@@ -163,7 +184,7 @@ for ibest in range(len(results_best)):
 
     test_errors = get_errors(n_test_data, path_test_data, sys_name, time_end, time_step, snr, expr)
 
-    results_best['test_TE_mean'] = np.mean(test_errors)
+    results_best.loc[ibest, 'test_TE_mean'] = np.mean(test_errors)
 
 
 ## save results

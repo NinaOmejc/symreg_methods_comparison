@@ -143,9 +143,8 @@ if __name__ == '__main__':
 
     method = "proged"
     exp_version = "e1"  # "e1" (constrained model search space) or "e2" (unconstrained model search space)
-    observability = "full"  # "full" or "partial"
-    simulation_type = "num" if observability == "full" else "sym"  # numerical derivation (num) or simulation by solving system of odes using initial values (sym)
-    exp_type = f"sysident_{simulation_type}_{observability}"
+    observability = "partial"  # "full" or "partial"
+    exp_type = f"sysident_{observability}"
     only_redo_unsuccessful = False    # if True, only the models that were not successfully identified in the previous run will be identified
 
     # data settings

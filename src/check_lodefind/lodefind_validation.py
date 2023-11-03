@@ -168,6 +168,10 @@ results_best = validation_results.groupby(['system', 'data_size', 'snr', 'obs'])
 ###################################################################################################
 print("Doing testing...")
 
+# load results_best
+validation_results = pd.read_csv(f"{path_results_out}{os.sep}validation_gathered_results_{method}_{exp_version}_{exp_type}.csv", sep=',')
+results_best = validation_results.groupby(['system', 'data_size', 'snr', 'obs']).agg({'val_TE_mean': 'min', 'expr': 'first'}).reset_index()
+
 for ibest in range(len(results_best)):
     data_size = results_best.iloc[ibest]['data_size']
     sys_name = results_best.iloc[ibest]['system']
@@ -179,7 +183,7 @@ for ibest in range(len(results_best)):
 
     test_errors = get_errors(n_test_data, path_test_data, sys_name, time_end, time_step, snr, expr)
 
-    results_best['test_TE_mean'] = np.mean(test_errors)
+    results_best.loc[ibest, 'test_TE_mean'] = np.mean(test_errors)
 
 
 ## save results

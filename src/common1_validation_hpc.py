@@ -6,7 +6,10 @@ import numpy as np
 import sympy as sp
 from scipy.integrate import odeint
 from scipy.interpolate import interp1d
-from src.utils.systems_collection import systems_collection
+try:
+    from src.utils.systems_collection import systems_collection  # to run locally
+except ImportError:
+    from utils.systems_collection import systems_collection  # to run on HPC
 
 def load_and_join_results(methods, path_in_gathered_results):
     fnames_all = os.listdir(path_in_gathered_results)
@@ -184,6 +187,7 @@ if __name__ == "__main__":
     # save results with additional validation column
     results_subset.to_csv(f"{path_in_gathered_results}validation_gathered_results_{exp_version}_withValTE_subset{iinput}.csv",
                           sep='\t', index=False)
+
 
 ##
 

@@ -15,11 +15,13 @@ The repository contains the code for evaluation of five symbolic regression meth
 
 4. Download Dynobench benchmark from the Zenodo platform, that is located here: https://zenodo.org/records/10041312. Save the dataset folder `.\dynobench\data\*` inside the symreg_methods_comparison folder
 
-5. Download L-ODEfind software from: https://github.com/agussomacal/L-ODEfind. Note that the method GPoM is downloaded automatically from the CRAN repository, inside the R script.
+5. Download L-ODEfind software from: https://github.com/agussomacal/L-ODEfind.
+  
+7. GPoM requires R to run. While you need to install R yourself (also RStudio IDE is recommended), GPoM package is downloaded automatically from the CRAN repository, inside the R script.
 
-6. Modify the data files for DSO using the script `.\utils\dso_prepare_data.py`. Similarly, modify the data for L-ODEfind and GPoM using the script `.\utils\lodefind_gpom_prepare_data.py`. The modified data files will be saved inside .\data folder.
+8. Modify the data files for DSO using the script `.\utils\dso_prepare_data.py`. Similarly, modify the data for L-ODEfind and GPoM using the script `.\utils\lodefind_gpom_prepare_data.py`. The modified data files will be saved inside .\data folder.
 
-7. Create candidate structures for ProGED using `.\src\proged_generate_structures.py`.
+9. Create candidate structures for ProGED using `.\src\proged_generate_structures.py`.
 
 ## Part I - System identification using training datasets
 We ran system identification with the methods ProGED, DSO and SINDy on the high-performance computing cluster. To repeat the experiments, follow the steps below.
@@ -31,10 +33,11 @@ Run the bash shell script that corresponds to the method you want to run (e.g. f
 We ran the other two methods for partial observability, GPoM and L-ODEfind, locally, using the scripts `.\src\check_gpom\gpom_system_identification.R` and `.\src\check_lodefind\lodefind_system_identification.py`. Importantly, the script `lodefind_system_identification.py` has to be run inside L-ODEfind-master root directory. The results of the system identification will be then saved in the symreg_methods_comparison\results\... path as for other methods.
 
 ## Part II - Validation datasets
-In this part, we evaluate all the models that were returned by the methods using the validation datasets. We ran the validation on the cluster as well, using the command `sbatch run_validation.sh`. The bash script runs the python code `common1_validation_hpc.py`.
+In this part, we evaluate all the models that were returned by the methods using the validation datasets. We ran the validation for full observability and for ProGED partial observablity results on the cluster using the command `sbatch run_validation.sh`. The bash script runs the python code `common1_validation_hpc.py`.
+Validation of GPoM and L-ODEfind results was done locally, using the scripts `./check_gpom/gpom_validation.py` and `./check_lodefind/lodefind_validation.py` respectively. Note that the evaluation on the test set is done within the same script.
 
 ## Part III - Evaluation of best model per method using three metrics - trajectory error on test data, term difference and complexity
-To do that, first run the `common2_testing.py` and then the `common3_TD_complexity.py` script. The figures for the paper were created using the `common4_make_figures.py` script.
+To do the final evaluation of full observability results, first run the `common2_testing.py` and then the `common3_TD_complexity.py` script. The figures for the paper were created using the `common4_make_figures.py` script.
 
 
 

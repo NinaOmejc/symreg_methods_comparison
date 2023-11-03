@@ -4,9 +4,11 @@ import numpy as np
 import pandas as pd
 import time
 import itertools
-from src.utils.systems_collection import systems_collection
 from dso import DeepSymbolicOptimizer
-
+try:
+    from src.utils.systems_collection import systems_collection
+except ImportError:
+    from utils.systems_collection import systems_collection
 
 def run_dso(systems, path_data, fname_data, iinit, eq_sym, snrs=[None, 30, 13], observability="full",
             use_default_library=False, path_out=".\\results\\check_dso\\", path_config=".\\src\\config.json"):

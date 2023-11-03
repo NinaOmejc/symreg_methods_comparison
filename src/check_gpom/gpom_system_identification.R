@@ -56,7 +56,8 @@ fit_gpomo <- function(time, ladata, observed_var, max_time_derivative, poly_degr
       colnames(coeffs) <- rev(poLabs(nVar=max_time_derivative*n_vars, dMax = 1, Xnote=toupper(observed_var))[-1])
       rownames(coeffs) <- poLabs(nVar=max_time_derivative*n_vars, dMax = poly_degree, Xnote=toupper(observed_var))
       
-      out_filename3 <- paste0(write_results_folder, 'params_', out_filename_base, '_', model_name, '.csv')
+      out_filename3 <- paste0(write_results_folder, '/params_', out_filename_base, '_', model_name, '.csv')
+      dir.create(write_results_folder)
       write.csv(coeffs, paste(out_filename3, sep='/'))
     },
     error = function(e){
@@ -101,24 +102,26 @@ fit_gpomo <- function(time, ladata, observed_var, max_time_derivative, poly_degr
 }
 
 
-experiment <- function(filename, write_results_folder, observed_var, keep2test, steps_list, max_time_derivatives, poly_degrees, verbose, sys_name, snr, init){
+experiment <- function(path_data, fname_data, write_results_folder, observed_var, keep2test, steps_list, 
+                       max_time_derivatives, poly_degrees, verbose, sys_name, data_size, snr, init){
   
-  data_raw <- read.csv(filename)
+  data_raw <- read.csv(paste0(path_data, fname_data))
   n <- dim(data_raw)[1]
   time <- data_raw[1:(n-keep2test),1]
   data <- data_raw[1:(n-keep2test),observed_var]
-  print(data)
-  #fit data and time it
+  # print(data)
+  # fit data and time it
   for(steps in steps_list){
     for (max_time_derivative in max_time_derivatives){
       for (poly_degree in poly_degrees){
         
         print(paste('Doing steps:', steps, 'max time derivative', max_time_derivative, 'poly degree', poly_degree))
-        
-        out_filename_base <- paste0('gpomo_myvdp_dmax', max_time_derivative, '_poly', poly_degree,'_steps', steps, '_obs', paste(observed_var, collapse=''), '_snr', snr, '_init', iinit)
-        out_filename1 <- paste0(write_results_folder, 'params_', out_filename_base, '_best.csv')
-        out_filename2 <- paste0(write_results_folder, 'duration_', out_filename_base, '.csv')
-        plots_filename <- paste0(write_results_folder,'plots_',out_filename_base, '.png')
+        final_directory = paste0('gpom_', sys_name, '_', data_size, '_dmax', max_time_derivative, '_poly', poly_degree,'_steps', steps, '_obs', paste(observed_var, collapse=''), '_snr', snr, '_init', iinit)
+        write_results_folder_final <- paste0(write_results_folder, final_directory, sep = "/")
+        out_filename_base <- paste0('gpom_', sys_name, '_', data_size, '_dmax', max_time_derivative, '_poly', poly_degree,'_steps', steps, '_obs', paste(observed_var, collapse=''), '_snr', snr, '_init', iinit)
+        out_filename1 <- paste0(write_results_folder_final, 'params_', out_filename_base, '_best.csv')
+        out_filename2 <- paste0(write_results_folder_final, 'duration_', out_filename_base, '.csv')
+        plots_filename <- paste0(write_results_folder_final,'plots_',out_filename_base, '.png')
         
         t0 <- Sys.time()
         tryCatch({  
@@ -130,7 +133,7 @@ experiment <- function(filename, write_results_folder, observed_var, keep2test, 
                               steps=steps,
                               plots_filename = plots_filename,
                               verbose = verbose,
-                              write_results_folder=write_results_folder, 
+                              write_results_folder=write_results_folder_final, 
                               out_filename_base = out_filename_base)
           
           duration <- round(as.numeric(difftime(time1 = Sys.time(), time2 = t0, units = "secs")), 3)
@@ -154,50 +157,62 @@ experiment <- function(filename, write_results_folder, observed_var, keep2test, 
 ###############################################################################
 
 exp_version = 'e1' # e1: constrained search space (we did not do e2 version (unconstrained space) for gpom)
-system = 'vdp'
+exp_type = "sysident_partial"
+system_name = "vdp"
 data_version = "train"
-data_length = 2000
-test_length = 1
-snrs = c('inf', 30, 13)
+snrs = c('None', '30', '13')
 inits = c(0:3)
 obss = list(c('x', 'y'), c('x'),c('y'))
-# obss = list(c('x', 'y'))
 targets = c(1, 2, 3)
 maxpolys = 3
 steps = 5120 
 targets_to_plot = c(1,2)
+data_sizes = c("small", "large")
 
+main_path = "D:/Experiments/symreg_methods_comparison" # adjust accordingly
 
-#isnr = 'inf'
-#iinit = 0
-#iobs = c('x', 'y')
-
-
-for(isnr in snrs){
-  for (iinit in inits){
-    for (iobs in obss){
-      print(paste("Doing: snr ", isnr, " | init: ",  iinit, " | obs: ", iobs))
-      
-      if (length(iobs) == 1){
-        max_time_derivative = c(2)
-      } else{
-        max_time_derivative = c(1)
+for (data_size in data_sizes){
+  
+  if (data_size == "large"){
+    data_length = 2000 # in timepoints
+    test_size = 200 
+    time_end = 20 # in seconds
+    time_step = 0.01
+  }else{
+    data_length = 100 
+    test_size = 10 
+    time_end = 10
+    time_step = 0.1
+  }
+  
+  for(isnr in snrs){
+    for (iinit in inits){
+      for (iobs in obss){
+        print(paste("Doing: size: ", data_size, "| snr: ", isnr, " | init: ",  iinit, " | obs: ", iobs))
+        
+        if (length(iobs) == 1){
+          max_time_derivative = c(2)
+        } else{
+          max_time_derivative = c(1)
+        }
+        experiment(
+          path_data = paste0(main_path, "/data/", data_version, "/", data_size, "_for_lodefind_gpom/", system_name, "/"),
+          fname_data = paste0("data_", system_name, "_len", as.character(time_end), "_rate", gsub("\\.", "", as.character(time_step)), "_snr", isnr, "_init", iinit, ".csv"),
+          write_results_folder = paste(main_path, "/results/", exp_type, "/gpom/", exp_version, "/", system_name, "/", sep=""),
+          observed_var = iobs,
+          keep2test = test_size,
+          steps_list = steps,
+          max_time_derivatives = max_time_derivative, 
+          poly_degrees = c(3),
+          verbose = TRUE,
+          sys_name = system_name,
+          data_size = data_size,
+          snr = isnr,
+          init = iinit
+        )
+        
+        print(paste("Finished size: ", data_size, "| snr ", isnr, " | init: ",  iinit, " | obs: ", iobs))
       }
-      experiment(
-        filename = paste("D:/Experiments/MLJ23/data/lodefind/data_lodefind_", system, "_", data_version, "_len", data_length, "_snr", isnr, "_init", iinit, ".csv", sep=""),
-        write_results_folder = paste("D:/Experiments/MLJ23/results/gpomo/", exp_version, "/", system, "/", sep=""),
-        observed_var = iobs,
-        keep2test = test_length,
-        steps_list = steps,
-        max_time_derivatives = max_time_derivative, 
-        poly_degrees = c(3),
-        verbose = TRUE,
-        sys_name = system,
-        snr = isnr,
-        init = iinit
-      )
-      
-      print(paste("Finished: snr ", isnr, " | init: ",  iinit, " | obs: ", iobs))
     }
   }
 }

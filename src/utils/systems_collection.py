@@ -1,4 +1,7 @@
-from src.utils.system import System
+try:
+    from src.utils.system import System
+except ImportError:
+    from utils.system import System
 import numpy as np
 
 """

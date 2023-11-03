@@ -3,8 +3,12 @@ import sys
 import numpy as np
 import pandas as pd
 import itertools
-from src.utils.systems_collection import systems_collection
-from src.utils.proged_utils import get_fit_settings, get_grammar_type
+try:
+    from src.utils.systems_collection import systems_collection
+    from src.utils.proged_utils import get_fit_settings, get_grammar_type
+except ImportError:
+    from utils.systems_collection import systems_collection
+    from utils.proged_utils import get_fit_settings, get_grammar_type
 import ProGED as pg
 
 

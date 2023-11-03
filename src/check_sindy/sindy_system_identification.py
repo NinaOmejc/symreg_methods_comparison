@@ -4,9 +4,10 @@ import pandas as pd
 import time
 import itertools
 import pysindy as ps
-from src.utils.systems_collection import systems_collection
-# from src.check_sindy.re_auto3 import x_for_dM
-
+try:
+    from src.utils.systems_collection import systems_collection
+except:
+    from utils.systems_collection import systems_collection
 
 def run_sindy(systems, path_data, fname_data, observability="full", snrs=[None, 30, 13],
               iinit=0, regulation_params=None, path_out=".\\check_sindy\\results\\", use_default_library=False,

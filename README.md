@@ -33,10 +33,11 @@ Run the bash shell script that corresponds to the method you want to run (e.g. f
 We ran the other two methods for partial observability, GPoM and L-ODEfind, locally, using the scripts `.\src\check_gpom\gpom_system_identification.R` and `.\src\check_lodefind\lodefind_system_identification.py`. Importantly, the script `lodefind_system_identification.py` has to be run inside L-ODEfind-master root directory. The results of the system identification will be then saved in the symreg_methods_comparison\results\... path as for other methods.
 
 ## Part II - Validation datasets
-In this part, we evaluate all the models that were returned by the methods using the validation datasets. We ran the validation on the cluster as well, using the command `sbatch run_validation.sh`. The bash script runs the python code `common1_validation_hpc.py`.
+In this part, we evaluate all the models that were returned by the methods using the validation datasets. We ran the validation for full observability and for ProGED partial observablity results on the cluster using the command `sbatch run_validation.sh`. The bash script runs the python code `common1_validation_hpc.py`.
+Validation of GPoM and L-ODEfind results was done locally, using the scripts `./check_gpom/gpom_validation.py` and `./check_lodefind/lodefind_validation.py` respectively. Note that the evaluation on the test set is done within the same script.
 
 ## Part III - Evaluation of best model per method using three metrics - trajectory error on test data, term difference and complexity
-To do that, first run the `common2_testing.py` and then the `common3_TD_complexity.py` script. The figures for the paper were created using the `common4_make_figures.py` script.
+To do the final evaluation of full observability results, first run the `common2_testing.py` and then the `common3_TD_complexity.py` script. The figures for the paper were created using the `common4_make_figures.py` script.
 
 
 
